@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Quick-Node</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="assets/logo/logo.png" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+    <!-- <button onclick="clearStorage()">Clear Local Storage</button> -->
+    <nav class="flex">
+        <div class="logo">
+            <img src="assets/logo/logoNavbar.png" alt="logo">
+        </div>
+        <!-- <a href="login.html">Login</a> -->
+
+        <!-- Search + Filter -->
+        <div class="functionalities">
+            <input type="text" id="searchInput" placeholder="Search by product name">
+            <button onclick="loadProducts()" class="search-btn"><img src="assets/search/search_6532053.png"
+                    alt="search-png"></button>
+            <select onchange="loadProducts()" id="categoryFilter" style="padding: 0.8rem 2rem;">
+                <option value="All">All Categories</option>
+            </select>
+
+            <a href="cart.html" class="cart"><img src="assets/cart/shopping-cart_6387788.png" alt="cart png"></a>
+            <button class="login-btn" onclick="window.location.href='login.html'">Login</button>
+            <button class="logout-btn" onclick="logout()" style="display: none;">Logout</button>
+        </div>
+    </nav>
+
+    <div class="hero-showcase">
+        <div class="floating-images">
+            <img src="assets/floatingObj/Screenshot_2025-06-30_151226-removebg-preview (1).png" class="float cart" alt="Cart">
+            <img src="assets/floatingObj/image-removebg-preview.png" class="float cart2" alt="Cart">
+            <img src="assets/floatingObj/lady.png" class="float people" alt="People Shopping">
+            <img src="assets/floatingObj/product.png" class="float productimg" alt="Product">
+        </div>
+
+        <div class="hero-center-text">
+            <h1 class="glow">Quick Node</h1>
+            <p class="tagline">Speed. Simplicity. Smart Shopping.</p>
+        </div>
+    </div>
+
+
+    <div id="products"></div>
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Quick-Node</h3>
+                <p>Your one-stop shop for all your tech needs. Fast. Reliable. Affordable.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Contact Us</h4>
+                <p>Email: support@quicknode.com</p>
+                <p>Phone: +91 99xxx xxxxx</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">Shop</a></li>
+                    <li><a href="cart.html">Cart</a></li>
+                    <li><a href="#">FAQs</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Quick-Node. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

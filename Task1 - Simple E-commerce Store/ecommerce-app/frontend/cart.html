@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Your Cart</title>
+  <link rel="stylesheet" href="cart.css">
+  <link rel="shortcut icon" href="assets/logo/logo.png" type="image/x-icon">
+</head>
+
+<body>
+  <main>
+    <header>
+      <h2>Your Cart</h2>
+    </header>
+
+    <section id="cartItems"></section>
+
+    <section class="cart-summary">
+      <h3>Total: ₹<span id="total"></span></h3>
+    </section>
+
+    <section class="form-section">
+      <h3>Shipping Address</h3>
+      <textarea id="shippingAddress" rows="4" placeholder="Enter your full shipping address" required></textarea>
+
+      <h3>Payment Method</h3>
+      <select id="paymentMethod" required>
+        <option value="Cash on Delivery">Cash on Delivery</option>
+        <option value="Credit Card">Credit Card</option>
+        <option value="UPI">UPI</option>
+        <option value="Net Banking">Net Banking</option>
+      </select>
+      <div id="cardFields" style="display: none;">
+        <label for="cardNumber">Card Number</label>
+        <input type="text" id="cardNumber" placeholder="Enter your card number" maxlength="16" />
+      </div>
+
+      <div id="upiFields" style="display: none;">
+        <label for="upiId">UPI ID</label>
+        <input type="text" id="upiId" placeholder="e.g. username@bank" />
+      </div>
+
+    </section>
+
+    <section class="checkout">
+      <button onclick="checkout()">Checkout</button>
+    </section>
+  </main>
+
+  <footer class="footer-bottom">
+    <p>&copy; 2025 Quick-Node. All rights reserved.</p>
+  </footer>
+
+  <script>
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const cartItemsDiv = document.getElementById('cartItems');
+    let total = 0;
+
+    cart.forEach(item => {
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'cart-item';
+
+      const img = document.createElement('img');
+      img.src = item.image;
+      img.alt = item.name;
+      img.className = 'cart-item-image';
+
+      const info = document.createElement('div');
+      info.className = 'cart-item-info';
+      info.innerHTML = `<strong>${item.name}</strong><br>₹${item.price.toFixed(2)}`;
+
+      itemDiv.appendChild(img);
+      itemDiv.appendChild(info);
+      cartItemsDiv.appendChild(itemDiv);
+
+      total += item.price;
+    });
+
+    document.getElementById('total').textContent = total.toFixed(2);
+
+    function checkout() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Login required');
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const address = document.getElementById('shippingAddress').value.trim();
+      const payment = document.getElementById('paymentMethod').value;
+
+      if (!address) {
+        alert('Please enter your shipping address.');
+        return;
+      }
+
+      const productMap = {};
+      cart.forEach(item => {
+        productMap[item.id] = (productMap[item.id] || 0) + 1;
+      });
+
+      const products = Object.entries(productMap).map(([id, quantity]) => ({
+        productId: id,
+        quantity
+      }));
+
+      fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token
+        },
+        body: JSON.stringify({
+          products,
+          total,
+          shippingAddress: address,
+          paymentMethod: payment
+        })
+      }).then(res => {
+        if (res.ok) {
+          alert('Order placed successfully!');
+          localStorage.removeItem('cart');
+          window.location.href = 'index.html';
+        } else {
+          alert('Order failed');
+        }
+      });
+    }
+    // Show/hide inputs based on payment method
+    document.getElementById("paymentMethod").addEventListener("change", function () {
+      const method = this.value;
+      document.getElementById("cardFields").style.display = method === "Credit Card" ? "block" : "none";
+      document.getElementById("upiFields").style.display = method === "UPI" ? "block" : "none";
+    });
+
+  </script>
+</body>
+
+</html>

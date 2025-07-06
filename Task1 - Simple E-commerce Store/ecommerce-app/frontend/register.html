@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Register</title>
+  <link rel="stylesheet" href="login.css">
+  <link rel="shortcut icon" href="assets/logo/logo.png" type="image/x-icon">
+</head>
+
+<body>
+  <!-- remove container in error -->
+  <div class="container">
+    <div class="logo">
+      <img src="assets/logo/logoNavbar.png" alt="logo">
+    </div>
+    <h2>Register</h2>
+    <form id="registerForm">
+      <input type="text" id="username" placeholder="Username" required><br><br>
+      <input type="email" id="email" placeholder="Email" required><br><br>
+      <input type="password" id="password" placeholder="Password" required><br><br>
+      <button type="submit">Register</button>
+    </form>
+    <p>Already have an account? <a href="login.html">Login</a></p>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2025 Quick-Node. All rights reserved.</p>
+  </div>
+
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: document.getElementById('username').value,
+          email: document.getElementById('email').value,
+          password: document.getElementById('password').value
+        })
+      });
+
+      if (res.ok) {
+        alert('Registered successfully');
+        window.location.href = 'login.html';
+      } else {
+        alert('Registration failed');
+      }
+    });
+  </script>
+</body>
+
+</html>

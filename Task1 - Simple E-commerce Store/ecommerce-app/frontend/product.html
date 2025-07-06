@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Product Details</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="product.css">
+  <link rel="shortcut icon" href="assets/logo/logo.png" type="image/x-icon">
+</head>
+
+<body>
+  <main id="productDetails"></main>
+
+  <footer class="footer-bottom">
+    <p>&copy; 2025 Quick-Node. All rights reserved.</p>
+  </footer>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get("id");
+
+    fetch(`/api/products/${productId}`)
+      .then(res => res.json())
+      .then(p => {
+        const container = document.getElementById("productDetails");
+        const allImages = [p.image, ...(p.images || [])];
+        const mainImage = allImages[0];
+
+        container.innerHTML = `
+          <section class="product-container">
+            <div class="left-column">
+              <img src="${mainImage}" id="mainImage" alt="${p.name}" class="main-product-image" />
+              <div class="thumbnails">
+                ${allImages.map((img, index) => `
+                  <img src="${img}" class="thumbnail" data-index="${index}" alt="thumb-${index}" />
+                `).join('')}
+              </div>
+            </div>
+
+            <div class="right-column">
+              <h1 class="product-title">${p.name}</h1>
+              <p class="price">₹${p.price}</p>
+              <p class="mrp">MRP: ₹${(p.price * 1.2).toFixed(0)} <span class="offer">(20% OFF)</span></p>
+              <p class="delivery">Free delivery by Tomorrow | 7-day return policy</p>
+
+              <p><strong>Description:</strong> ${p.description}</p>
+
+              <section class="specs">
+                <h2>Specifications:</h2>
+                <ul>
+                  ${p.specifications?.length ? p.specifications.map(spec => `<li>${spec}</li>`).join('') : "<li>Not available</li>"}
+                </ul>
+              </section>
+
+              <div class="actions">
+                <button class="add-cart" onclick="addToCart('${p._id}', '${p.name}', ${p.price})">Add to Cart</button>
+              </div>
+
+              <section class="ratings">
+                <h3>Customer Ratings</h3>
+                ${[5, 4, 3, 2, 1].map(star => `
+                  <div class="rating-bar">
+                    <span>${star}★</span>
+                    <div class="rating-fill" style="width: ${star === 5 ? 80 : star === 4 ? 12 : star === 3 ? 5 : star === 2 ? 2 : 1}%; background: gold;"></div>
+                    <span class="rating-percentage">${star === 5 ? 80 : star === 4 ? 12 : star === 3 ? 5 : star === 2 ? 2 : 1}%</span>
+                  </div>
+                `).join('')}
+              </section>
+
+              <section class="reviews">
+                <h3>Top Reviews</h3>
+                <article class="review-item">
+                  <h4>John D. ★★★★★</h4>
+                  <p>Absolutely worth the price. Amazing build quality and performance.</p>
+                </article>
+                <article class="review-item">
+                  <h4>Priya K. ★★★★☆</h4>
+                  <p>Great product, just the delivery took a bit longer than expected.</p>
+                </article>
+              </section>
+            </div>
+          </section>
+        `;
+
+        // Image switcher
+        document.querySelectorAll(".thumbnail").forEach(img => {
+          img.addEventListener("click", () => {
+            document.getElementById("mainImage").src = img.src;
+          });
+        });
+      });
+
+    function addToCart(id, name, price) {
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      // Include image
+      const image = document.getElementById("mainImage").src;
+      cart.push({ id, name, price, image });
+      localStorage.setItem("cart", JSON.stringify(cart));
+      alert("Added to cart!");
+    }
+
+  </script>
+</body>
+
+</html>
