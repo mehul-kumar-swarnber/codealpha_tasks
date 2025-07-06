@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Taskly - Task Comments</title>
+  <link rel="shortcut icon" href="assets/logo/ChatGPT_Image_Jul_6__2025__12_17_50_PM-removebg-preview.png" type="image/x-icon">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background-color: rgba(0, 0, 0, 0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .modal {
+      background-color: #fff;
+      border-radius: 16px;
+      padding: 30px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+      position: relative;
+      animation: popIn 0.3s ease-out;
+    }
+
+    @keyframes popIn {
+      from {
+        transform: scale(0.9);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .modal h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #2d3e50;
+    }
+
+    .close-btn {
+      position: absolute;
+      right: 16px;
+      top: 16px;
+      font-size: 22px;
+      font-weight: bold;
+      color: #666;
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+
+    #commentsList {
+      max-height: 200px;
+      overflow-y: auto;
+      margin-bottom: 16px;
+      border: 1px solid #eee;
+      padding: 10px;
+      border-radius: 10px;
+      background-color: #f9fbfd;
+    }
+
+    #commentsList div {
+      padding: 8px 10px;
+      margin-bottom: 6px;
+      background-color: #e2ebf7;
+      border-radius: 8px;
+      color: #2d3e50;
+    }
+
+    #commentInput {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    #typingIndicator {
+      font-size: 12px;
+      color: gray;
+      margin-bottom: 10px;
+      height: 14px;
+    }
+
+    button.send-btn {
+      width: 100%;
+      padding: 12px;
+      background-color: #5b8ad6;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button.send-btn:hover {
+      background-color: #4976bd;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="modal">
+    <span class="close-btn" onclick="window.history.back()">×</span>
+    <h2>📝 Task Comments</h2>
+    <div id="commentsList"></div>
+    <input type="text" id="commentInput" placeholder="Write a comment..." />
+    <div id="typingIndicator"></div>
+    <button onclick="sendComment()" class="send-btn">Send</button>
+  </div>
+
+  <script>
+    const socket = io('http://localhost:5000');
+    const token = localStorage.getItem('token');
+    const taskId = new URLSearchParams(window.location.search).get('taskId');
+    const projectId = new URLSearchParams(window.location.search).get('projectId');
+    const headers = { 'Authorization': token, 'Content-Type': 'application/json' };
+
+    const commentInput = document.getElementById('commentInput');
+    const typingIndicator = document.getElementById('typingIndicator');
+
+    socket.emit('joinProject', projectId);
+
+    commentInput.addEventListener('input', () => {
+      socket.emit('typing', { taskId });
+    });
+
+    socket.on('typing', (data) => {
+      if (data.taskId === taskId) {
+        typingIndicator.textContent = 'Someone is typing...';
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(() => typingIndicator.textContent = '', 2000);
+      }
+    });
+
+    function loadComments() {
+      fetch(`http://localhost:5000/api/comments/${taskId}`, { headers })
+        .then(res => res.json())
+        .then(comments => {
+          const list = document.getElementById('commentsList');
+          list.innerHTML = '';
+          comments.forEach(c => {
+            const div = document.createElement('div');
+            div.textContent = `${c.userId.name}: ${c.content}`;
+            list.appendChild(div);
+          });
+        });
+    }
+
+    function sendComment() {
+      const content = commentInput.value.trim();
+      if (!content) return;
+
+      fetch('http://localhost:5000/api/comments', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ content, taskId })
+      }).then(() => {
+        commentInput.value = '';
+        socket.emit('commentAdded', { projectId });
+      });
+    }
+
+    socket.on('commentAdded', (data) => {
+      if (data.projectId === projectId) loadComments();
+    });
+
+    let typingTimeout;
+    loadComments();
+  </script>
+</body>
+</html>

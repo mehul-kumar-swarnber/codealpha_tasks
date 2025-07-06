@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Taskly - Login</title>
+  <link rel="shortcut icon" href="assets/logo/ChatGPT_Image_Jul_6__2025__12_17_50_PM-removebg-preview.png" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #e9f0f7;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #2d3e50;
+    }
+
+    .login-container {
+      background-color: #ffffff;
+      border-radius: 16px;
+      padding: 40px;
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+      box-shadow:
+        0 0 12px rgba(91, 138, 214, 0.3),
+        0 0 20px rgba(91, 138, 214, 0.2),
+        0 0 30px rgba(91, 138, 214, 0.1);
+      transition: box-shadow 0.3s ease;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+      font-size: 28px;
+      color: #3a4e66;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 15px;
+      margin: 10px 0;
+      border: 1px solid #cfd8e3;
+      border-radius: 8px;
+      background-color: #f9fbfd;
+      font-size: 15px;
+      color: #2d3e50;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #7ca7d9;
+      background-color: #fff;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 15px;
+      background-color: #5b8ad6;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #4976bd;
+    }
+
+    button[type="button"] {
+      background-color: #cfd8e3;
+      color: #2d3e50;
+      margin-top: 10px;
+    }
+
+    button[type="button"]:hover {
+      background-color: #b5c3d4;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      left: -9999px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="login-container">
+    <form onsubmit="login(); return false;" novalidate>
+      <h1>Welcome to Taskly</h1>
+      
+      <label for="email" class="visually-hidden">Email</label>
+      <input type="email" id="email" placeholder="Email" required />
+      
+      <label for="password" class="visually-hidden">Password</label>
+      <input type="password" id="password" placeholder="Password" required />
+      
+      <button type="submit">Login</button>
+      <button type="button" onclick="goToRegister()">Register</button>
+    </form>
+    <p id="errorMessage" style="color: red; margin-top: 10px;"></p>
+  </div>
+
+  <script>
+    function login() {
+      const errorMessage = document.getElementById('errorMessage');
+      errorMessage.textContent = ''; // Clear previous errors
+
+      fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: document.getElementById('email').value,
+          password: document.getElementById('password').value
+        })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.token) {
+            localStorage.setItem('token', data.token);
+            window.location.href = "dashboard.html";
+          } else {
+            errorMessage.textContent = data.message || "Invalid email or password.";
+          }
+        })
+        .catch(err => {
+          console.error("Login error:", err);
+          errorMessage.textContent = "Incorrect email or password.";
+        });
+
+    }
+
+    function goToRegister() {
+      window.location.href = 'register.html';
+    }
+  </script>
+</body>
+
+</html>
